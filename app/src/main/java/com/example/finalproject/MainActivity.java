@@ -38,7 +38,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
    private final int IMG_REQUEST = 1;
    private String pathToImg;
    private static String apiKey = "cbe4ec0015644dc4b1594f756e32bfa7";
-   private static String endpoint = "https://cs125-project.cognitiveservices.azure.com/vision/v2.1/describe";
+   private static String captionEndpoint = "https://cs125-project.cognitiveservices.azure.com/vision/v2.1/describe";
+   private static String emojiEndpoint = "https://api.ritekit.com/v1/emoji/auto-emojify?text=";
+   private static String clientID = "8ff15b0fde705482a6270cdf2fe7471f8a708df90c0d";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
         final byte[] imgData = stream.toByteArray();
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, endpoint, new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, captionEndpoint, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -103,7 +105,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         JSONObject desc = (JSONObject) jsonObject.get("description");
                         String cap = desc.getJSONArray("captions").getJSONObject(0).getString("text");
                         System.out.println(cap);
-                        showCaption(cap);
+                        addEmojis(cap);
+                        //showCaption(cap);
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -147,5 +150,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button another = findViewById(R.id.another);
         another.setOnClickListener(this);
         capText.setText(caption);
+    }
+    public void addEmojis(final String caption) {
+        String toReturn = "";
+        String[] words = caption.split(" ");
+        for (int i = 0; i < words.length; i++) {
+           if (i == words.length - 1) {
+               toReturn += words[i];
+           } else if (i == 0) {
+               toReturn += words[i].substring(0,1).toUpperCase() + words[i].substring(1)+ " ";
+           }
+           else {
+               toReturn += (words[i] + "%20");
+           }
+        }
+        StringRequest request = new StringRequest(Request.Method.GET, emojiEndpoint + toReturn + "&client_id=" + clientID, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                System.out.println(response);
+                try {
+                    JSONObject resp = new JSONObject(response);
+                    String cap = resp.getString("text");
+                    showCaption(cap);
+                } catch (JSONException e) {
+                    Toast.makeText(MainActivity.this, "Error, something went wrong",Toast.LENGTH_SHORT);
+                }
+
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        })
+        ;
+        MySingleton.getInstance(MainActivity.this).addToRequestQueue(request);
+
     }
 }

@@ -10,7 +10,7 @@
         android:id="@+id/headerText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Your Generated Caption:"
+        android:text="@string/cap_button"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -20,8 +20,8 @@
 
     <TextView
         android:id="@+id/caption"
-        android:layout_width="191dp"
-        android:layout_height="93dp"
+        android:layout_width="200dp"
+        android:layout_height="96dp"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -32,25 +32,24 @@
 
     <Button
         android:id="@+id/another"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="108dp"
-        android:text="Generate another caption"
+        android:layout_width="240dp"
+        android:layout_height="45dp"
+        android:text="@string/another"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.459" />
+        app:layout_constraintVertical_bias="0.465" />
 
     <Button
-        android:id="@+id/button2"
-        android:layout_width="217dp"
-        android:layout_height="50dp"
-        android:text="Post to Instagram"
+        android:id="@+id/post"
+        android:layout_width="240dp"
+        android:layout_height="45dp"
+        android:text="@string/post"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.556"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.565" />
