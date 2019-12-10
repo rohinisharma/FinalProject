@@ -3,6 +3,9 @@ package com.example.finalproject;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
@@ -17,9 +20,11 @@ import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,11 +41,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
    private ImageView img;
    Bitmap bitmap;
    private final int IMG_REQUEST = 1;
-   private String pathToImg;
+
    private static String apiKey = "cbe4ec0015644dc4b1594f756e32bfa7";
    private static String captionEndpoint = "https://cs125-project.cognitiveservices.azure.com/vision/v2.1/describe";
    private static String emojiEndpoint = "https://api.ritekit.com/v1/emoji/auto-emojify?text=";
    private static String clientID = "8ff15b0fde705482a6270cdf2fe7471f8a708df90c0d";
+   private RequestQueue myQueue;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         img = findViewById(R.id.image);
         ChooseBn.setOnClickListener(this);
         UploadBn.setOnClickListener(this);
+        myQueue = Volley.newRequestQueue(this);
     }
     @Override
     public void onClick(View v) {
@@ -58,6 +65,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 selectImage();
                 break;
             case R.id.uploadBn:
+                setContentView(R.layout.caption_display);
+                findViewById(R.id.headerText).setVisibility(View.GONE);
+                findViewById(R.id.caption).setVisibility(View.GONE);
+                findViewById(R.id.another).setVisibility(View.GONE);
+                findViewById(R.id.copy).setVisibility(View.GONE);
                 uploadImage();
                 break;
             case R.id.another:
@@ -67,6 +79,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ChooseBn.setOnClickListener(this);
                 UploadBn.setOnClickListener(this);
                 img = findViewById(R.id.image);
+                break;
+            case R.id.copy:
+                TextView cap = findViewById(R.id.caption);
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("caption", cap.getText());
+                clipboard.setPrimaryClip(clip);
+                Toast toast=Toast. makeText(getApplicationContext(),"Copied to clipboard",Toast. LENGTH_SHORT);
+                toast.show();
+                break;
         }
     }
     private void selectImage() {
@@ -80,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == IMG_REQUEST && resultCode == RESULT_OK && data != null) {
             Uri path = data.getData();
-            pathToImg = path.getPath();
             try {
                 ImageDecoder.Source source = ImageDecoder.createSource(getContentResolver(), path);
                 bitmap = ImageDecoder.decodeBitmap(source);
@@ -142,13 +162,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return imgData;
             }
         };
-        MySingleton.getInstance(MainActivity.this).addToRequestQueue(stringRequest);
+        myQueue.add(stringRequest);
     }
     public void showCaption(String caption) {
-        setContentView(R.layout.caption_display);
+        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
         TextView capText = findViewById(R.id.caption);
+        Button copy = findViewById(R.id.copy);
         Button another = findViewById(R.id.another);
+        capText.setVisibility(View.VISIBLE);
+        copy.setVisibility(View.VISIBLE);
+        another.setVisibility(View.VISIBLE);
+        findViewById(R.id.headerText).setVisibility(View.VISIBLE);
         another.setOnClickListener(this);
+        copy.setOnClickListener(this);
         capText.setText(caption);
     }
     public void addEmojis(final String caption) {
@@ -183,9 +209,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onErrorResponse(VolleyError error) {
 
             }
-        })
-        ;
-        MySingleton.getInstance(MainActivity.this).addToRequestQueue(request);
+        });
+
+        myQueue.add(request);
 
     }
 }
